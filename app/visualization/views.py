@@ -24,7 +24,7 @@ def api():
     print(request.args)
     cursor = db.get_db().cursor()
     cursor.execute(
-        "SELECT (a.t_avg - b.t_avg) as t_diff, (a.prcp - b.prcp) as prcp_diff, a.county as county FROM (SELECT * FROM weather WHERE ob_date=%s) a JOIN (SELECT * FROM weather WHERE ob_date=%s) b ON a.station_name = b.station_name GROUP BY a.county",
+        "SELECT (a.t_avg - b.t_avg) as t_diff, (a.prcp - b.prcp) as prcp_diff, a.county as county FROM (SELECT * FROM weather WHERE ob_date=%s) a JOIN (SELECT * FROM weather WHERE ob_date=%s) b ON a.station_name = b.station_name GROUP BY a.county, a.id",
         (request.args.get('week_1'), request.args.get('week_2'))
     )
 
