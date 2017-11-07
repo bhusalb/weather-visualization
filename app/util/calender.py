@@ -11,13 +11,14 @@ def get_weeks(year):
     for quarterly in c.yeardatescalendar(year):
         for monthly in quarterly:
             for weekly in monthly:
-                if weekly[6] < today:
+                if (weekly[6] < today) and ((len(weeks) is 0) or (weeks[-1] != weekly[6])):
                     weeks.append(weekly[6])
 
     return weeks
 
 
 def get_weeks_for_2016_2017():
+    print(get_weeks(2017)[::-1])
     return get_weeks(2017)[::-1] + get_weeks(2016)[::-1]
 
 
