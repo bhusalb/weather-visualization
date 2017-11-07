@@ -1,9 +1,11 @@
 2016.csv
-2017.csv
+2017.csv.gz
 county-codes.csv
 filtered-2016.csv
 filtered-2017.csv
+filtered-1-2017.csv
 filtered-stations.csv
+for-mysql-import-2017.csv
 filtered-US009052008-2016.csv
 final-version-2016.csv
 fixing-missing-data.csv

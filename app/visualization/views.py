@@ -3,7 +3,7 @@ from . import visualization
 import json
 from app import db, util
 from flask import Response, request
-
+from app import util
 
 @visualization.route('/')
 def homepage():

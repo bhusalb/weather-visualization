@@ -1,5 +1,12 @@
 import csv
+import datetime
+
 import pymysql.cursors
+import gzip
+import os
+
+import requests
+import time
 
 
 def filter_location_csv():
@@ -30,7 +37,7 @@ def refine_ghcnd_txt():
 
 
 def only_us_states_data(year):
-    with open(year + '.csv') as csvfile:
+    with gzip.open(year + '.csv.gz', 'rt') as csvfile:
         with open('filtered-' + year + '.csv', 'wt') as csvfile1:
             reader = csv.reader(csvfile)
             writer = csv.writer(csvfile1)
@@ -40,7 +47,7 @@ def only_us_states_data(year):
 
 
 def restructure_csv_file(year):
-    with open('filtered-' + year + '.csv') as csvfile1:
+    with open('filtered-1-' + year + '.csv') as csvfile1:
         with open('restructured-' + year + '.csv', 'wt') as csvfile:
             reader = csv.reader(csvfile1)
             require_params = ['PRCP', 'TMAX', 'TMIN']
@@ -294,3 +301,126 @@ def add_missing_data_to_mysql_db():
             cursor.execute(sql)
             connection.commit()
             print(sql)
+
+
+def restructure_for_mysql_import(year):
+    with open('reduce-data-sets-' + year + '.csv') as csvfile:
+        with open('for-mysql-import-' + year + '.csv', 'wt') as csvfile1:
+            reader = csv.DictReader(csvfile)
+            writer = csv.writer(csvfile1)
+            for row in reader:
+                t_avg = (float(row['TMAX']) + float(row['TMIN'])) / 2
+                date = row['date'][:4] + '-' + row['date'][4:6] + '-' + row['date'][6:]
+                writer.writerow([row['station_name'], row['TMAX'], row['TMIN'], t_avg, row['PRCP'],
+                                 date])
+
+
+def import_generate_csv_file_to_mysql(year):
+    with open('for-mysql-import-' + year + '.csv') as csvfile:
+        connection = pymysql.connect(host='localhost',
+                                     user='root',
+                                     password='root',
+                                     db='data_visualization',
+                                     cursorclass=pymysql.cursors.DictCursor,
+                                     local_infile=True
+                                     )
+
+        cursor = connection.cursor()
+        filepath = os.path.join(os.path.dirname(__file__), 'for-mysql-import-' + year + '.csv')
+        print(filepath)
+        sql = "LOAD DATA LOCAL INFILE '" + filepath + "' INTO TABLE data_visualization.weather FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' (station_name,t_max,t_min, t_avg,prcp,ob_date)"
+        print(sql)
+        cursor.execute(sql)
+        connection.commit()
+
+
+def add_county_lat_long_for_null_on_database():
+    connection = pymysql.connect(host='localhost',
+                                 user='root',
+                                 password='root',
+                                 db='data_visualization',
+                                 cursorclass=pymysql.cursors.DictCursor)
+
+    cursor = connection.cursor()
+    sql = """UPDATE weather w JOIN stations s USING(station_name) SET w.geo_lat = s.geo_lat, w.geo_long = s.geo_long, w.county = s.county WHERE w.county is NULL"""
+    cursor.execute(sql)
+    connection.commit()
+
+
+def get_last_modified_date_before_downloading(year):
+    req = requests.head('https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/' + year + '.csv.gz')
+    return datetime.datetime.strptime(req.headers['Last-Modified'], '%a, %d %b %Y %H:%M:%S GMT')
+
+
+def download_csv_from_server(year):
+    req = requests.get('https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/' + year + '.csv.gz')
+    filename = year + '.csv.gz'
+    with open(filename, 'wb') as fd:
+        for chunk in req.iter_content(chunk_size=128):
+            fd.write(chunk)
+    os.utime(os.path.join(os.path.dirname(__file__), filename),
+             (datetime.datetime.now().timestamp(), get_last_modified_date_before_downloading(year).timestamp()))
+
+
+def get_local_csv_last_modified_date(year):
+    file_path = os.path.join(os.path.dirname(__file__), year + '.csv.gz')
+    if os.path.exists(file_path):
+        return datetime.datetime.fromtimestamp(os.path.getmtime())
+    else:
+        return None
+
+
+def only_unavailable_in_database(year):
+    connection = pymysql.connect(host='localhost',
+                                 user='root',
+                                 password='root',
+                                 db='data_visualization',
+                                 cursorclass=pymysql.cursors.DictCursor)
+
+    cursor = connection.cursor()
+    sql = "SELECT MAX(ob_date) as MAX_DATE from  weather where YEAR(ob_date) = %s"
+    cursor.execute(sql, year)
+    result = cursor.fetchone()
+    max_date = result['MAX_DATE']
+    if max_date:
+        max_date = max_date.strftime('%Y%m%d')
+
+    print(max_date)
+    with open('filtered-' + year + '.csv') as csvfile:
+        with open('filtered-1-' + year + '.csv', 'wt') as csvfile1:
+            reader = csv.reader(csvfile)
+            writer = csv.writer(csvfile1)
+            for row in reader:
+                if max_date is None or int(max_date) < int(row[1]):
+                    writer.writerow(row)
+
+
+# only_us_states_data('2015')
+# only_unavailable_in_database('2015')
+# restructure_csv_file('2017')
+# reduce_structured_data('2017')
+# restructure_for_mysql_import('2017')
+# import_generate_csv_file_to_mysql('2017')
+# add_county_lat_long_for_null_on_database()
+
+def fixing_2017_dataset_issue():
+    connection = pymysql.connect(host='localhost',
+                                 user='root',
+                                 password='root',
+                                 db='data_visualization',
+                                 cursorclass=pymysql.cursors.DictCursor)
+
+    cursor = connection.cursor()
+    sql = "SELECT DISTINCT station_name, geo_lat, geo_long from  weather where county is NULL"
+    cursor.execute(sql)
+
+    for row in cursor.fetchall():
+        res = requests.get(
+            'http://data.fcc.gov/api/block/find?format=json&latitude=%s&longitude=%s&showall=true' % (
+                str(row['geo_lat']), str(row['geo_long'])))
+
+        sql = "Update weather SET county=%s where county is NULL and station_name=%s"
+        print(res.json())
+
+        cursor.execute(sql, (res.json()['County']['FIPS'], row['station_name']))
+        connection.commit()
