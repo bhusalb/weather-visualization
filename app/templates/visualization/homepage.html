@@ -16,16 +16,20 @@
 <body>
 
     <div class="container" style="overflow-x: hidden;">
+        <div class="well">
+            <p>- Only up to {{ max_available_date }} data are available.</p>
+            <p>- All temperatures are in Fahrenheit</p>
+            <p>- All Precipitation data are in mm</p>
+        </div>
         <div class="row col-md-offset-2 col-md-8">
             <div class="row">
             <form class="form-horizontal" method="GET">
-
                     <div class="form-group">
                         <label class="col-sm-2 control-label">Select a Week</label>
                         <div class="col-sm-10">
                           <select class="form-control" name="week_1">
                               {% for week in weeks %}
-                                    <option value="{{ week }}">Week ending on {{ week.strftime('%d-%m-%y') }}</option>
+                                    <option value="{{ week }}" {{ 'selected' if request.args.get('week_1') == week|string else '' }} >Week ending on {{ week.strftime('%d-%m-%y') }}</option>
                               {% endfor %}
                           </select>
                         </div>
@@ -35,7 +39,7 @@
                         <div class="col-sm-10">
                           <select class="form-control" name="week_2">
                               {% for week in weeks %}
-                                    <option value="{{ week }}">Week ending on {{ week.strftime('%d-%m-%y') }}</option>
+                                    <option value="{{ week }}" {{ 'selected' if request.args.get('week_2') == week|string else '' }}>Week ending on {{ week.strftime('%d-%m-%y') }}</option>
                               {% endfor %}
                           </select>
                         </div>

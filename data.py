@@ -47,7 +47,7 @@ def only_us_states_data(year):
 
 
 def restructure_csv_file(year):
-    with open('filtered-1-' + year + '.csv') as csvfile1:
+    with open('filtered-2-' + year + '.csv') as csvfile1:
         with open('restructured-' + year + '.csv', 'wt') as csvfile:
             reader = csv.reader(csvfile1)
             require_params = ['PRCP', 'TMAX', 'TMIN']
@@ -424,3 +424,14 @@ def fixing_2017_dataset_issue():
 
         cursor.execute(sql, (res.json()['County']['FIPS'], row['station_name']))
         connection.commit()
+
+
+def remove_quality_fail_data(year):
+    with open('filtered-1-' + year + '.csv') as csvfile:
+        with open('filtered-2-' + year + '.csv', 'wt') as csvfile1:
+            reader = csv.reader(csvfile)
+            writer = csv.writer(csvfile1)
+            for row in reader:
+                if not row[5]:
+                    writer.writerow(row)
+

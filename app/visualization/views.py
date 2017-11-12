@@ -5,15 +5,21 @@ from app import db, util
 from flask import Response, request
 from app import util
 
+
 @visualization.route('/')
 def homepage():
+    max_available_date = util.helpers.get_max_available_date()
     show_map = False
     dates = None
     if request.args.get('week_1') and request.args.get('week_2'):
         show_map = True
         dates = util.calender.custom_requirement_combine_weeks(request.args.get('week_1'), request.args.get('week_2'))
     return render_template('visualization/homepage.html', title='Home Page',
-                           weeks=util.calender.get_weeks_for_2016_2017(), show_map=show_map, dates=dates)
+                           weeks=util.calender.get_weeks_for_2016_2017(),
+                           show_map=show_map,
+                           dates=dates,
+                           max_available_date=max_available_date
+                           )
 
 
 @visualization.route('api')
@@ -24,7 +30,7 @@ def api():
     print(request.args)
     cursor = db.get_db().cursor()
     cursor.execute(
-        "SELECT (a.t_avg - b.t_avg) as t_diff, (a.prcp - b.prcp) as prcp_diff, a.county as county FROM (SELECT * FROM weather WHERE ob_date=%s) a JOIN (SELECT * FROM weather WHERE ob_date=%s) b ON a.station_name = b.station_name GROUP BY a.county, a.id",
+        "SELECT TENTHS_C_TO_F(a.t_avg - b.t_avg) as t_diff, (a.prcp - b.prcp) / 10 as prcp_diff, c.county as county FROM weather AS a JOIN weather AS b USING(station_name) JOIN stations as c USING(station_name) WHERE a.ob_date=%s AND b.ob_date=%s GROUP BY county",
         (request.args.get('week_1'), request.args.get('week_2'))
     )
 
@@ -36,9 +42,6 @@ def api():
 
     def generate():
         for row in data:
-            if type(row[0]) == 'float':
-                row[0] = (9.0 / 50) * row[0] + 32
-
             row = [str(item) for item in row]
             yield ','.join(row) + '\n'
 
