@@ -365,7 +365,7 @@ def download_csv_from_server(year):
 def get_local_csv_last_modified_date(year):
     file_path = os.path.join(os.path.dirname(__file__), year + '.csv.gz')
     if os.path.exists(file_path):
-        return datetime.datetime.fromtimestamp(os.path.getmtime())
+        return datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
     else:
         return None
 
