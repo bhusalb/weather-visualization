@@ -355,10 +355,11 @@ def get_last_modified_date_before_downloading(year):
 def download_csv_from_server(year):
     req = requests.get('https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/' + year + '.csv.gz')
     filename = year + '.csv.gz'
+    filename = os.path.join(os.path.dirname(__file__), filename)
     with open(filename, 'wb') as fd:
         for chunk in req.iter_content(chunk_size=128):
             fd.write(chunk)
-    os.utime(os.path.join(os.path.dirname(__file__), filename),
+    os.utime(filename,
              (datetime.datetime.now().timestamp(), get_last_modified_date_before_downloading(year).timestamp()))
 
 
