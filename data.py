@@ -9,9 +9,13 @@ import requests
 import time
 
 
+def get_exact_file_path(filename):
+    os.path.join(os.path.dirname(__file__), 'for-mysql-import-' + year + '.csv')
+
+
 def filter_location_csv():
-    with open('new-location-1.csv', 'wt') as csvfile:
-        with open('location.csv') as csvfile1:
+    with open(get_exact_file_path('new-location-1.csv'), 'wt') as csvfile:
+        with open(get_exact_file_path('location.csv')) as csvfile1:
             reader = csv.DictReader(csvfile1, delimiter=',')
             writer = csv.DictWriter(csvfile, fieldnames=reader.fieldnames)
             writer.writeheader()
@@ -25,8 +29,8 @@ def filter_location_csv():
 
 
 def refine_ghcnd_txt():
-    with open('new-ghcnd.csv', 'wt') as csvfile:
-        with open('ghcnd-stations.txt') as csvfile1:
+    with open(get_exact_file_path('new-ghcnd.csv'), 'wt') as csvfile:
+        with open(get_exact_file_path('ghcnd-stations.txt')) as csvfile1:
             reader = csv.reader(csvfile1, delimiter=' ')
             writer = csv.writer(csvfile)
             for row in reader:
@@ -37,8 +41,8 @@ def refine_ghcnd_txt():
 
 
 def only_us_states_data(year):
-    with gzip.open(year + '.csv.gz', 'rt') as csvfile:
-        with open('filtered-' + year + '.csv', 'wt') as csvfile1:
+    with gzip.open(get_exact_file_path(year + '.csv.gz'), 'rt') as csvfile:
+        with open(get_exact_file_path('filtered-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.reader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
@@ -47,8 +51,8 @@ def only_us_states_data(year):
 
 
 def restructure_csv_file(year):
-    with open('filtered-2-' + year + '.csv') as csvfile1:
-        with open('restructured-' + year + '.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('filtered-2-' + year + '.csv')) as csvfile1:
+        with open(get_exact_file_path('restructured-' + year + '.csv'), 'wt') as csvfile:
             reader = csv.reader(csvfile1)
             require_params = ['PRCP', 'TMAX', 'TMIN']
             writer = csv.DictWriter(csvfile, fieldnames=['station_name', 'date'] + require_params)
@@ -68,8 +72,8 @@ def restructure_csv_file(year):
 
 
 def filter_us_stations():
-    with open('new-ghcnd.csv') as csvfile:
-        with open('filtered-stations.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('new-ghcnd.csv')) as csvfile:
+        with open(get_exact_file_path('filtered-stations.csv'), 'wt') as csvfile1:
             reader = csv.reader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
@@ -79,11 +83,11 @@ def filter_us_stations():
 
 def weather_data_with_lat_long(year):
     stations = []
-    with open('stations-with-fips.csv') as csvfile2:
+    with open(get_exact_file_path('stations-with-fips.csv')) as csvfile2:
         reader1 = csv.reader(csvfile2)
         stations = [row for row in reader1]
-    with open('reduce-data-sets-' + year + '.csv') as csvfile:
-        with open('with-lat-long-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('reduce-data-sets-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('with-lat-long-' + year + '.csv'), 'wt') as csvfile1:
 
             reader = csv.DictReader(csvfile)
             writer = csv.DictWriter(csvfile1, fieldnames=reader.fieldnames + ['TAVG', 'LAT', 'LONG', 'FIPS'])
@@ -102,8 +106,8 @@ def weather_data_with_lat_long(year):
 
 
 def reduce_station_data_column():
-    with open('filtered-stations.csv') as csvfile2:
-        with open('limited-field-stations.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('filtered-stations.csv')) as csvfile2:
+        with open(get_exact_file_path('limited-field-stations.csv'), 'wt') as csvfile:
             writer = csv.writer(csvfile)
             reader1 = csv.reader(csvfile2)
             for row in reader1:
@@ -116,8 +120,8 @@ def get_fips_id(row):
 
 
 def add_fips_id_to_station():
-    with open('limited-field-stations.csv') as csvfile2:
-        with open('stations-with-fips-1.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('limited-field-stations.csv')) as csvfile2:
+        with open(get_exact_file_path('stations-with-fips-1.csv'), 'wt') as csvfile:
             writer = csv.writer(csvfile)
             reader1 = csv.reader(csvfile2)
             for row in reader1:
@@ -125,8 +129,8 @@ def add_fips_id_to_station():
 
 
 def reduce_structured_data(year):
-    with open('restructured-' + year + '.csv') as csvfile:
-        with open('reduce-data-sets-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('restructured-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('reduce-data-sets-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.DictReader(csvfile)
             writer = csv.DictWriter(csvfile1, fieldnames=reader.fieldnames)
             writer.writeheader()
@@ -136,8 +140,8 @@ def reduce_structured_data(year):
 
 
 def format_for_mysql_import(year):
-    with open('with-lat-long-' + year + '.csv') as csvfile:
-        with open('final-version-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('with-lat-long-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('final-version-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.DictReader(csvfile)
             writer = csv.writer(csvfile1)
             count = 1
@@ -152,8 +156,8 @@ def format_for_mysql_import(year):
 
 
 def specific_station_data_only(station_name, year):
-    with open('filtered-' + year + '.csv') as csvfile:
-        with open('filtered-' + station_name + '-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('filtered-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('filtered-' + station_name + '-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.reader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
@@ -162,8 +166,8 @@ def specific_station_data_only(station_name, year):
 
 
 def grab_lat_and_long_only():
-    with open('limited-field-stations.csv') as csvfile2:
-        with open('lat-and-long.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('limited-field-stations.csv')) as csvfile2:
+        with open(get_exact_file_path('lat-and-long.csv'), 'wt') as csvfile:
             writer = csv.writer(csvfile)
             reader1 = csv.reader(csvfile2)
             for row in reader1:
@@ -176,8 +180,8 @@ def remove_under_score_from_county_code(code):
 
 
 def refine_receive_form_datascience_toolkit():
-    with open('xx.csv') as csvfile:
-        with open('refine_data_county_1.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('xx.csv')) as csvfile:
+        with open(get_exact_file_path('refine_data_county_1.csv'), 'wt') as csvfile1:
             reader = csv.DictReader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
@@ -187,7 +191,7 @@ def refine_receive_form_datascience_toolkit():
 
 
 def grab_county_code_from_mysql():
-    with open('county-codes.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('county-codes.csv'), 'wt') as csvfile:
         writer = csv.writer(csvfile)
         connection = pymysql.connect(host='localhost',
                                      user='root',
@@ -214,7 +218,7 @@ def add_county_to_mysql_database():
 
     cursor = connection.cursor()
 
-    with open('county-codes.csv') as csvfile:
+    with open(get_exact_file_path('county-codes.csv')) as csvfile:
         reader = csv.reader(csvfile)
         count = 1
         not_found = 0
@@ -253,7 +257,7 @@ def grab_lat_long_from_db():
 
     cursor.execute(sql)
     connection.commit()
-    with open('new-lat-long.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('new-lat-long.csv'), 'wt') as csvfile:
         writer = csv.writer(csvfile)
         for row in cursor.fetchall():
             writer.writerow([row['geo_lat'], row['geo_long']])
@@ -273,7 +277,7 @@ def fix_missing_county_using_fcc_api():
     cursor.execute(sql)
     connection.commit()
     import requests
-    with open('fixing-missing-data.csv', 'wt') as csvfile:
+    with open(get_exact_file_path('fixing-missing-data.csv'), 'wt') as csvfile:
         writer = csv.writer(csvfile)
         count = 1
         for row in cursor.fetchall():
@@ -293,7 +297,7 @@ def add_missing_data_to_mysql_db():
                                  cursorclass=pymysql.cursors.DictCursor)
 
     cursor = connection.cursor()
-    with open('fixing-missing-data.csv') as csvfile:
+    with open(get_exact_file_path('fixing-missing-data.csv')) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             sql = "UPDATE weather SET county='" + row[2] + "' WHERE geo_lat = " + row[0] + " and geo_long = " + row[1]
@@ -304,8 +308,8 @@ def add_missing_data_to_mysql_db():
 
 
 def restructure_for_mysql_import(year):
-    with open('reduce-data-sets-' + year + '.csv') as csvfile:
-        with open('for-mysql-import-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('reduce-data-sets-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('for-mysql-import-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.DictReader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
@@ -316,7 +320,7 @@ def restructure_for_mysql_import(year):
 
 
 def import_generate_csv_file_to_mysql(year):
-    with open('for-mysql-import-' + year + '.csv') as csvfile:
+    with open(get_exact_file_path('for-mysql-import-' + year + '.csv')) as csvfile:
         connection = pymysql.connect(host='localhost',
                                      user='root',
                                      password='root',
@@ -356,7 +360,7 @@ def download_csv_from_server(year):
     req = requests.get('https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/' + year + '.csv.gz')
     filename = year + '.csv.gz'
     filename = os.path.join(os.path.dirname(__file__), filename)
-    with open(filename, 'wb') as fd:
+    with open(get_exact_file_path(filename), 'wb') as fd:
         for chunk in req.iter_content(chunk_size=128):
             fd.write(chunk)
     os.utime(filename,
@@ -387,8 +391,8 @@ def only_unavailable_in_database(year):
         max_date = max_date.strftime('%Y%m%d')
 
     print(max_date)
-    with open('filtered-' + year + '.csv') as csvfile:
-        with open('filtered-1-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('filtered-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('filtered-1-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.reader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
@@ -428,8 +432,8 @@ def fixing_2017_dataset_issue():
 
 
 def remove_quality_fail_data(year):
-    with open('filtered-1-' + year + '.csv') as csvfile:
-        with open('filtered-2-' + year + '.csv', 'wt') as csvfile1:
+    with open(get_exact_file_path('filtered-1-' + year + '.csv')) as csvfile:
+        with open(get_exact_file_path('filtered-2-' + year + '.csv'), 'wt') as csvfile1:
             reader = csv.reader(csvfile)
             writer = csv.writer(csvfile1)
             for row in reader:
