@@ -10,7 +10,7 @@ import time
 
 
 def get_exact_file_path(filename):
-    os.path.join(os.path.dirname(__file__), 'for-mysql-import-' + year + '.csv')
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 def filter_location_csv():
@@ -360,7 +360,7 @@ def download_csv_from_server(year):
     req = requests.get('https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/' + year + '.csv.gz')
     filename = year + '.csv.gz'
     filename = os.path.join(os.path.dirname(__file__), filename)
-    with open(get_exact_file_path(filename), 'wb') as fd:
+    with open(filename, 'wb') as fd:
         for chunk in req.iter_content(chunk_size=128):
             fd.write(chunk)
     os.utime(filename,
