@@ -119,6 +119,7 @@
             .units('counties')
             .unitId('county')
             .scale(650)
+            .legendScale(['warmer', 'colder'])
             .legend(true),
 
             d3.geomap.choropleth()
@@ -127,6 +128,7 @@
             .units('counties')
             .unitId('county')
             .scale(650)
+            .legendScale(['wetter', 'dryer'])
             .colors(colorbrewer.Blues[9])
             .legend(true)
         ]

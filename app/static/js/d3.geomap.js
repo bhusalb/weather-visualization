@@ -535,7 +535,8 @@ var Choropleth = (function (_Geomap) {
             duration: null,
             format: d3.format(',.02f'),
             legend: false,
-            valueScale: d3.scale.quantize
+            valueScale: d3.scale.quantize,
+            legendScale: null
         };
 
         for (var key in properties) {
@@ -676,9 +677,16 @@ var Choropleth = (function (_Geomap) {
             // Draw color scale labels.
             sg.selectAll('text').data(colors).enter().append('text').text(function (d, i) {
                 // The last element in the colors list corresponds to the lower threshold.
+
+                if(i === steps - 1)
+                    return self.properties.legendScale[1];
+
+                return '';
+
                 if (i === steps - 1) {
                     var text = self.properties.format(minDisplay);
                     if (addLower) text = '< ' + text;
+                    console.log(text);
                     return text;
                 }
                 return self.properties.format(self.colorScale.invertExtent(d)[0]);
@@ -690,6 +698,8 @@ var Choropleth = (function (_Geomap) {
 
             // Draw label for end of extent.
             sg.append('text').text(function () {
+                return self.properties.legendScale[0];
+
                 var text = self.properties.format(maxDisplay);
                 if (addGreater) text = '> ' + text;
                 return text;
