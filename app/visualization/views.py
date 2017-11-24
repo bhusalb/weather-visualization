@@ -30,7 +30,7 @@ def api():
     print(request.args)
     cursor = db.get_db().cursor()
     cursor.execute(
-        "SELECT  (TENTHS_C_TO_F(a.t_avg) - TENTHS_C_TO_F(b.t_avg)) as t_diff, (a.prcp - b.prcp) / 10 as prcp_diff, c.county as county FROM weather AS a JOIN weather AS b USING(station_name) JOIN stations as c USING(station_name) WHERE a.ob_date=%s AND b.ob_date=%s GROUP BY county",
+        "SELECT  (TENTHS_C_TO_F(a.t_avg) - TENTHS_C_TO_F(b.t_avg)) as t_diff, TENTHS_MM_TO_INCH(a.prcp - b.prcp) as prcp_diff, c.county as county FROM weather AS a JOIN weather AS b USING(station_name) JOIN stations as c USING(station_name) WHERE a.ob_date=%s AND b.ob_date=%s GROUP BY county",
         (request.args.get('week_1'), request.args.get('week_2'))
     )
 

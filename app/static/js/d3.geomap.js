@@ -311,6 +311,10 @@ var colorbrewer = {
         10: ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd"],
         11: ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5"],
         12: ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"]
+    },
+    Custom: {
+        precipitation: ["#FFFF00", "#FFA500", "#FFFFFF", "#90EE90", "#006400"],
+        temperature: ["#FF0000", "#FFA500", "#FFFFFF", "#0000FF", "#000080"]
     }
 };
 'use strict';
@@ -535,7 +539,7 @@ var Choropleth = (function (_Geomap) {
             duration: null,
             format: d3.format(',.02f'),
             legend: false,
-            valueScale: d3.scale.quantize,
+            valueScale: d3.scale.threshold,
             legendScale: null
         };
 
@@ -678,7 +682,7 @@ var Choropleth = (function (_Geomap) {
             sg.selectAll('text').data(colors).enter().append('text').text(function (d, i) {
                 // The last element in the colors list corresponds to the lower threshold.
 
-                if(i === steps - 1)
+                if (i === steps - 1)
                     return self.properties.legendScale[1];
 
                 return '';
