@@ -314,7 +314,8 @@ var colorbrewer = {
     },
     Custom: {
         precipitation: ["#FFFF00", "#FFA500", "#FFFFFF", "#90EE90", "#006400"],
-        temperature: ["#FF0000", "#FFA500", "#FFFFFF", "#0000FF", "#000080"]
+        temperature: ["#000080", "#0000FF", "#FFFFFF", "#FFA500", "#FF0000"]
+
     }
 };
 'use strict';
