@@ -15,7 +15,7 @@ def homepage():
         show_map = True
         dates = util.calender.custom_requirement_combine_weeks(request.args.get('week_1'), request.args.get('week_2'))
     return render_template('visualization/homepage.html', title='Home Page',
-                           weeks=util.calender.get_weeks_for_2016_2017(),
+                           weeks=util.calender.get_weeks_for_min_max_year(),
                            show_map=show_map,
                            dates=dates,
                            max_available_date=max_available_date

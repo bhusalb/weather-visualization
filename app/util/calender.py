@@ -1,5 +1,6 @@
 import calendar, datetime
 import app, time
+from .helpers import get_max_min_year_from_database
 
 calendar.setfirstweekday(calendar.SUNDAY)
 
@@ -44,3 +45,14 @@ def custom_requirement_combine_weeks(date1, date2):
 
 def date_formatter(date, _format='%d-%M-%y'):
     return time.strptime(date, _format)
+
+
+def get_weeks_for_min_max_year():
+    years = get_max_min_year_from_database()
+    print(years)
+    weeks = []
+    for year in range(years['MAX_YEAR'], years['MIN_YEAR'] - 1, -1):
+        print('Year ->' + str(year))
+        weeks += get_weeks(year)[::-1]
+
+    return weeks
