@@ -11,7 +11,7 @@ class DevelopmentConfig(Config):
     Development configurations
     """
     DEBUG = True
-    SECRET_KEY = 'p9Bv<3Eid9%$i01sdasd'
+    SECRET_KEY = '<fill-here>'
     MYSQL_DATABASE_DB = 'data_visualization'
     MYSQL_DATABASE_USER = 'root'
     MYSQL_DATABASE_PASSWORD = 'root'
